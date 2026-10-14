@@ -21,14 +21,25 @@ function torontoOct14Utc(year) {
   return Date.UTC(year, 9, 14, 0, 0, 0) - offsetMin * 60000;
 }
 
-// True for all of Oct 14, as experienced in Ottawa (not the viewer's own time zone).
-function isBirthdayToday() {
-  const ottawaDateStr = new Intl.DateTimeFormat('en-CA', {
+// Current month/day as experienced in Ottawa (not the viewer's own time zone),
+// read via formatToParts so it doesn't depend on a locale's separator style.
+function getOttawaMonthDay(date) {
+  const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: BIRTHDAY_TZ,
     month: '2-digit',
     day: '2-digit',
-  }).format(new Date());
-  return ottawaDateStr === '10/14';
+  }).formatToParts(date);
+  const map = {};
+  parts.forEach((p) => {
+    if (p.type !== 'literal') map[p.type] = p.value;
+  });
+  return { month: parseInt(map.month, 10), day: parseInt(map.day, 10) };
+}
+
+// True for all of Oct 14, as experienced in Ottawa.
+function isBirthdayToday() {
+  const { month, day } = getOttawaMonthDay(new Date());
+  return month === 10 && day === 14;
 }
 
 function nextOct14() {
